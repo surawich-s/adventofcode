@@ -34,4 +34,4 @@ for x, y in zip(loc_1, loc_2):
     distance += abs(x - y)
     similarity += x * freq[x]
 print("First answer:",distance)
-print("Second answer:", similarity)
+print("Second answer:",similarity)
