@@ -19,28 +19,33 @@ for line in result:
     tmpline = line.split()
     reports.append([int(x) for x in tmpline])
 
-def check_safe_report(report):
-    mode = 'default'
+def check_safe_with_dampener(report):
+    if check_safe_report(report):
+        return True
     for i in range(len(report)):
-        if(i == 0): #init
-            tmp = report[i]
+        # Create a new report excluding the current level
+        modified_report = report[:i] + report[i + 1:]
+        if check_safe_report(modified_report):
+            return True
+    return False
+def check_safe_report(report, dampener=False):
+    mode = "increasing" if(report[1] > report[0]) else "decreasing"
+    for i in range(1,len(report)):
+        if( abs(report[i]-report[i-1]) < 1 or abs(report[i]-report[i-1]) > 3): #check level differ or equal
+                return False
         else:
-            if(report[i] == tmp or abs(report[i]-tmp) > 3): #check level differ
-                return 0 #unsafe report
-            if(abs(report[i]-tmp) > 0):
-                tmp_mode = "increasing" if(report[i] > tmp) else "decreasing"
-                if(mode == "default"): 
-                    mode = "increasing" if(report[i] > tmp) else "decreasing" #init mode
-                else: #to compare mode
-                    if (tmp_mode != mode):
-                        return 0 #inconsitent mode unsafe
-                    else:
-                        mode = tmp_mode
-                tmp = report[i] #update tmp
-    return 1
+            new_mode = "increasing" if(report[i] > report[i-1]) else "decreasing"
+            if new_mode != mode: # inconsistency in mode
+                    return False
+    return True
 
 safe_count = 0
+new_safe_count = 0
 for report in reports:
     safe_count += check_safe_report(report)
+    new_safe_count += check_safe_with_dampener(report)
+
+# Your existing counting code below...
 print('number of safe reports:', safe_count)
+print('number of new safe reports:', new_safe_count)
 
