@@ -16,7 +16,7 @@ result = read_file_to_list(file_path)
 
 loc_1 = []
 loc_2 = []
-freq = [0] * 100000  # Initialize list with zeros (adjust size as needed)
+freq = [0] * 100000  # Initialize list with zeros
 
 for line in result:
     tmpline = line.split()
