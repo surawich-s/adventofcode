@@ -13,6 +13,7 @@ def read_file_to_list(file_path):
 
 file_path = "2.txt"
 result = read_file_to_list(file_path)
+
 reports = []
 
 for line in result:
@@ -28,7 +29,7 @@ def check_safe_with_dampener(report):
         if check_safe_report(modified_report):
             return True
     return False
-def check_safe_report(report, dampener=False):
+def check_safe_report(report):
     mode = "increasing" if(report[1] > report[0]) else "decreasing"
     for i in range(1,len(report)):
         if( abs(report[i]-report[i-1]) < 1 or abs(report[i]-report[i-1]) > 3): #check level differ or equal
