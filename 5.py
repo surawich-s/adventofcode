@@ -17,7 +17,7 @@ def read_file_to_list(file_path):
 
     # print(order)
     return rule, order
-file_path = "test.txt"
+file_path = "5.txt"
 rule, order = read_file_to_list(file_path)
 # print(rule)s
 
@@ -30,6 +30,21 @@ def create_rule_dict(rules):
     return rule_dict
 
 rule_dict = create_rule_dict(rule)
-matching_rules = rule_dict.get(47, [])
-
-print(matching_rules)
+# matching_rules = rule_dict.get(5, [])
+total_middle = 0
+for x in order:
+    matching_rules = []
+    count = 0
+    for i in range(len(x)-1):
+        matching_rules = rule_dict.get(x[i]) or []
+        print(matching_rules)
+        if [x[i], x[i+1]] not in matching_rules:
+            print(x[i],x[i+1])
+            break
+        else:
+            count += 1
+    print(count)
+    if count == len(x)-1:
+        print('legit:',x,'middle:',x[int(len(x)/2)])
+        total_middle += x[int(len(x)/2)]
+print('total middle page number:', total_middle)
