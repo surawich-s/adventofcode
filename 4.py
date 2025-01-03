@@ -11,7 +11,7 @@ def read_file_to_list(file_path):
             
     return lines_list
 
-file_path = "test.txt"
+file_path = "4.txt"
 puzzle = read_file_to_list(file_path) or []
 
 def word_search(word, puzzle):
@@ -48,32 +48,44 @@ def word_search(word, puzzle):
 
 def word_search_xmas(puzzle):
     word_count = 0
-    def traverse_puzzle(x,y,word_pos=1,mcount=0,scount=0):
-        dmcount = mcount
-        dscount = scount
-        if(x < 0 or x > len(puzzle[0])-1 or y < 0 or y > len(puzzle)-1 or word_pos > 2):
+    m_count = 0
+    s_count = 0
+    def traverse_puzzle(x,y,word_pos=1):
+        nonlocal m_count, s_count
+        if(x < 0 or x > len(puzzle[0])-1 or y < 0 or y > len(puzzle)-1 or word_pos > 2 or m_count > 2 or s_count > 2):
             return 0
-        if(word_pos == 1):
-            if(puzzle[y][x] != 'A'):
-                return 0
-        else:
+        # if(word_pos == 1):
+        #     if(puzzle[y][x] != 'A'):
+        #         return 0
+        #     else:
+        #         print('found A at position:',x,y)
+        if(word_pos == 2):
             if(puzzle[y][x] == 'M'):
-                dmcount += 1
+                m_count += 1
+                print('found M at position:',x,y,'dmcount:', m_count)
             elif(puzzle[y][x] == 'S'):
-                dscount += 1
-            if(dmcount == 2 and dscount ==2):
+                s_count += 1
+                print('found S at position:',x,y,'dscount:', s_count)
+            else:
+                return 0
+            if(m_count == 2 and s_count == 2):
                 return 1
         return sum([
-            traverse_puzzle(x+1, y+1, word_pos+1, dmcount, dscount),  # southeast
-            traverse_puzzle(x-1, y+1, word_pos+1, dmcount, dscount), # southwest
-            traverse_puzzle(x+1, y-1, word_pos+1, dmcount, dscount), # northeast
-            traverse_puzzle(x-1, y-1, word_pos+1, dmcount, dscount), # northwest
+            traverse_puzzle(x+1, y+1, word_pos+1), # southeast
+            traverse_puzzle(x-1, y+1, word_pos+1), # southwest
+            traverse_puzzle(x+1, y-1, word_pos+1), # northeast
+            traverse_puzzle(x-1, y-1, word_pos+1), # northwest
         ])
 
-    for i in range(len(puzzle)):
-        for j in range(len(puzzle[0])):
+    for i in range(1,len(puzzle)-1):
+        for j in range(1,len(puzzle[0])-1):
             # traverse through puzzle 
-            word_count += traverse_puzzle(j,i)
+            
+            if(puzzle[i][j] == 'A'):
+                s_count = 0
+                m_count = 0
+                word_count += traverse_puzzle(j,i)
+            
             # print(word_count, j, i)
     return word_count
 
