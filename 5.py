@@ -19,7 +19,7 @@ def read_file_to_list(file_path):
     return rule, order
 file_path = "5.txt"
 rule, order = read_file_to_list(file_path)
-# print(rule)s
+# print(rule)
 
 def create_rule_dict(rules):
     rule_dict = {}
@@ -32,19 +32,67 @@ def create_rule_dict(rules):
 rule_dict = create_rule_dict(rule)
 # matching_rules = rule_dict.get(5, [])
 total_middle = 0
+total_fixed_middle = 0
+to_fix = []
+example = []
+for key in rule_dict.keys():
+    if key not in example:
+        # print(key, ' not in example')
+        example.append(key)
+    # print(example)
+    # print(rule_dict[key])
+    for x in rule_dict[key]:
+        if x[1] not in example:
+            # print(x[1], ' not in example')
+            example.append(x[1])
+        else:
+            if(example.index(x[1]) < example.index(x[0])):
+                example.remove(x[0])
+                # print('remove:',x[0])
+                example.insert(example.index(x[1]), x[0])
+                # print('move:', x[0],' to:', example.index(x[1]))
+print(example)
+
+def fix_order(order):
+    for i in range(0, len(order)-1):
+        tmp = order[i]
+        for j in range(i+1, len(order)):
+            if example.index(tmp) > example.index(order[j]):
+                order.remove(tmp)
+                print('remove:', tmp, 'and move to:', j)
+                order.insert(j, tmp)
+                print(order)
+    return order
+
 for x in order:
     matching_rules = []
     count = 0
+    tmp_fix = x.copy()
     for i in range(len(x)-1):
         matching_rules = rule_dict.get(x[i]) or []
-        print(matching_rules)
+        # print(matching_rules)
         if [x[i], x[i+1]] not in matching_rules:
-            print(x[i],x[i+1])
+            # print(x[i],x[i+1])
+            # tmp_fix[i+1] = x[i]
+            # tmp_fix[i] = x[i+1]
             break
         else:
             count += 1
-    print(count)
+    # print(count)
     if count == len(x)-1:
-        print('legit:',x,'middle:',x[int(len(x)/2)])
+        # print('legit:',x,'middle:',x[int(len(x)/2)])
         total_middle += x[int(len(x)/2)]
+        # if(example and len(x) > len(example)):
+        #     example = x
+        # if(not example):
+        #     example = x
+    else:
+        # print(x, tmp_fix)
+        tmp_fix = fix_order(tmp_fix)
+        print('fixed:',tmp_fix)
+        total_fixed_middle += tmp_fix[int(len(x)/2)]
+
+            
+        
 print('total middle page number:', total_middle)
+print('total fixed middle page number:', total_fixed_middle)
