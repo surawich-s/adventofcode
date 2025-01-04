@@ -17,7 +17,7 @@ def read_file_to_list(file_path):
 
     # print(order)
     return rule, order
-file_path = "5.txt"
+file_path = "test.txt"
 rule, order = read_file_to_list(file_path)
 # print(rule)
 
@@ -35,6 +35,7 @@ total_middle = 0
 total_fixed_middle = 0
 to_fix = []
 example = []
+
 for key in rule_dict.keys():
     if key not in example:
         # print(key, ' not in example')
@@ -45,12 +46,23 @@ for key in rule_dict.keys():
         if x[1] not in example:
             # print(x[1], ' not in example')
             example.append(x[1])
-        else:
-            if(example.index(x[1]) < example.index(x[0])):
-                example.remove(x[0])
-                # print('remove:',x[0])
-                example.insert(example.index(x[1]), x[0])
-                # print('move:', x[0],' to:', example.index(x[1]))
+        # else:
+        #     if(example.index(x[1]) < example.index(x[0])):
+        #         example.remove(x[0])
+        #         # print('remove:',x[0])
+        #         example.insert(example.index(x[1]), x[0])
+        #         # print('move:', x[0],' to:', example.index(x[1])
+    for i in range(len(example)-1):
+        tmp = example[i]
+        for j in range(i, len(example)-1):
+            matching_rules = rule_dict.get(tmp)
+            # print(matching_rules)
+            if [example[j], example[j+1]] not in matching_rules:
+                example.remove(tmp)
+                print('remove:', tmp, 'and move to:', j+1)
+                example.insert(j+1, tmp)
+            else:
+                break
 print(example)
 
 def fix_order(order):
@@ -59,9 +71,9 @@ def fix_order(order):
         for j in range(i+1, len(order)):
             if example.index(tmp) > example.index(order[j]):
                 order.remove(tmp)
-                print('remove:', tmp, 'and move to:', j)
+                # print('remove:', tmp, 'and move to:', j)
                 order.insert(j, tmp)
-                print(order)
+                # print(order)
     return order
 
 for x in order:
@@ -89,7 +101,7 @@ for x in order:
     else:
         # print(x, tmp_fix)
         tmp_fix = fix_order(tmp_fix)
-        print('fixed:',tmp_fix)
+        # print('fixed:',tmp_fix)
         total_fixed_middle += tmp_fix[int(len(x)/2)]
 
             
