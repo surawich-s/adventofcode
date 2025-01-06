@@ -1,3 +1,6 @@
+## TODO
+## Build new example using topological sort
+
 def read_file_to_list(file_path):
     rule = []
     order = []
