@@ -1,57 +1,69 @@
-## TODO
-## Build new rule using topological sort
-
+from collections import defaultdict, deque
 def read_file_to_list(file_path):
-    rule = []
-    order = []
+    rules, updates = [], []
     # Open and read the file
     with open(file_path, 'r') as file:
-        # Read entire file as one string
-        text = file.read()
-    list = text.split('\n\n')
+        sections = file.read().strip().split('\n\n')
+        rules = [[int(x) for x in line.split('|')] for line in sections[0].split('\n')]
+        updates = [[int(x) for x in line.split(',')] for line in sections[1].split('\n')]
 
-    for i in list[0].split('\n'):
-        rule.append([int(x) for x in i.split('|')])
-
-    # print(rule)
-
-    for i in list[1].split('\n'):
-        order.append([int(x) for x in i.split(',')])
-
-    # print(order)
-    return rule, order
-file_path = "example.txt"
-rule, order = read_file_to_list(file_path)
+    return rules, updates
 
 def create_rule_dict(rules):
-    rule_dict = {}
-    for rule in rules:
-        if rule[0] not in rule_dict:
-            rule_dict[rule[0]] = []
-        rule_dict[rule[0]].append(rule)
-    return rule_dict
+    graph = defaultdict(list)
+    in_degree = defaultdict(int)
+    nodes = set()
 
-rule_dict = create_rule_dict(rule)
-# matching_rules = rule_dict.get(5, [])
-total_middle = 0
-total_fixed_middle = 0
-to_fix = []
+    for x, y in rules:
+        graph[x].append(y)
+        in_degree[y] += 1
+        nodes.add(x)
+        nodes.add(y)
 
-for x in order:
-    matching_rules = []
-    count = 0
-    tmp_fix = x.copy()
-    for i in range(len(x)-1):
-        matching_rules = rule_dict.get(x[i]) or []
-        # print(matching_rules)
-        if [x[i], x[i+1]] not in matching_rules:
-            break
-        else:
-            count += 1
-    # print(count)
-    if count == len(x)-1:
-        # print('legit:',x,'middle:',x[int(len(x)/2)])
-        total_middle += x[int(len(x)/2)]
+    queue = deque([node for node in nodes if in_degree[node] == 0])
+    sorted_order = []
+
+    while queue:
+        node = queue.popleft()
+        sorted_order.append(node)
+        for neighbor in graph[node]:
+            in_degree[neighbor] -= 1
+            if in_degree[neighbor] == 0:
+                queue.append(neighbor)
+
+    
+    return sorted_order
+def validate_order(update, global_order):
+    index_map = {page: i for i, page in enumerate(global_order)}
+    for i in range(len(update) - 1):
+        if index_map[update[i]] > index_map[update[i + 1]]:
+            return False
+    return True
+
+def fix_update(update, global_order):
+    index_map = {page: i for i, page in enumerate(global_order)}
+    return sorted(update, key=lambda x: index_map[x])
+
+def calculate_middle_pages(updates):
+    return sum(update[len(update) // 2] for update in updates)
+
+file_path = "example.txt"
+rules, updates = read_file_to_list(file_path)
+# print(rules)
+global_order = create_rule_dict(rules)
+print(global_order)
+
+correct_updates = []
+incorrect_updates = []
+
+for update in updates:
+    if validate_order(update, global_order):
+        correct_updates.append(update)
+    else:
+        incorrect_updates.append(fix_update(update, global_order))
+        
+total_middle = calculate_middle_pages(correct_updates)    
+total_fixed_middle = calculate_middle_pages(incorrect_updates)
 
 print('total middle page number:', total_middle)
 print('total fixed middle page number:', total_fixed_middle)
