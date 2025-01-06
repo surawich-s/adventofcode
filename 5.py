@@ -20,9 +20,8 @@ def read_file_to_list(file_path):
 
     # print(order)
     return rule, order
-file_path = "test.txt"
+file_path = "example.txt"
 rule, order = read_file_to_list(file_path)
-# print(rule)
 
 def create_rule_dict(rules):
     rule_dict = {}
@@ -46,9 +45,6 @@ for x in order:
         matching_rules = rule_dict.get(x[i]) or []
         # print(matching_rules)
         if [x[i], x[i+1]] not in matching_rules:
-            # print(x[i],x[i+1])
-            # tmp_fix[i+1] = x[i]
-            # tmp_fix[i] = x[i+1]
             break
         else:
             count += 1
