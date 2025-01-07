@@ -5,6 +5,7 @@ def read_file_to_list(file_path):
         # Read entire file as one string
         text = file.read()
     maps = text.strip().split('\n')
+    maps = [list(line) for line in maps]
 
 
     return maps
@@ -23,8 +24,9 @@ def get_next_direction(current_key):
             
 def traverse(x,y, dx=0, dy=-1, direction = 'n', total_unique=0):
     exit = False
+    obstruction_positions = 0
     while not exit:
-        next_y, next_x = y + dy, x + dx
+        # next_y, next_x = y + dy, x + dx
         #  # Debug prints
         # print(f"Current position: ({y}, {x})")
         # print(f"Trying to move to: ({next_y}, {next_x})")
@@ -35,10 +37,20 @@ def traverse(x,y, dx=0, dy=-1, direction = 'n', total_unique=0):
             print('Found exit!!')
             exit = True
             break
+
+        if not maps[y+dy][x+dx] == '#':
+            # print(f"From direction: {direction}")
+            tmp_direction = get_next_direction(direction)
+            # print(f"New direction: {tmp_direction}")
+            tmp_dy,tmp_dx = direction_table[tmp_direction]
+            # print(f"tmp_dy, tmp_dx: ({tmp_dy},{tmp_dx})")
+            startx, starty = x,y
+            # print(f"Starting at {y} {x}")
+            obstruction_positions += traverse_with_imaginary_wall(x+tmp_dx,y+tmp_dy,tmp_dx,tmp_dy,tmp_direction, startx, starty, direction)
         
         # check if this position is unique
-        if [y,x] not in index_map:
-            index_map.append([y,x])
+        if (y,x) not in index_map:
+            index_map[y,x] = direction
             total_unique += 1
 
         # found next position is turning point
@@ -53,23 +65,65 @@ def traverse(x,y, dx=0, dy=-1, direction = 'n', total_unique=0):
         y += dy
         x += dx
 
-    return total_unique + 1
+    return total_unique + 1, obstruction_positions
             
+def traverse_with_imaginary_wall(x,y, dx, dy, direction, startx, starty, start_direction):
+
+    visited = set()
+    while True:
+
+        # Debug prints
+        # print(f"Current position: ({y}, {x})")
+        # print(f"dy, dx: ({dy},{dx})")
+
+        current_state = (x, y, direction)
+        if current_state in visited:
+            return False  # We're in a cycle that's not returning to start
+        visited.add(current_state)
+
+        
+        # found edges, impossible to be loop
+        if y+dy < 0 or y+dy > len(maps)-1 or x+dx < 0 or x+dx > len(maps[0])-1:
+            # print(f"\n\n Out of bound !! \n\n")
+            return False
+        
+        if startx == x and starty == y and direction == start_direction:
+            # print(f"Back to starting point: ({y},{x})")
+            # print(f"\n\n Loop \n\n")
+            return True
+    
+        # found next position is turning point
+        # print('Next position is:', y+dy,x+dx, 'which is:',maps[y+dy][x+dx])
+        if maps[y+dy][x+dx] == '#':
+            
+            direction = get_next_direction(direction)
+            # print('Change direction to:', direction)
+            dy,dx = direction_table[direction]
+            # print('dy, dx:',dy,dx)
+        
+        y += dy
+        x += dx
 
 file_path = "6.txt"
 maps = read_file_to_list(file_path)
 
 starting_point = find_starting_point(maps)
 
-index_map = []
+index_map = {}
 
 x,y = starting_point[0], starting_point[1]
 
 direction_table = {'n': [-1,0], 'e': [0,1], 's': [1,0], 'w': [0,-1]}
 
-total_unique = traverse(x,y)
+total_unique, obstruction_positions = traverse(x,y)
 
-print(total_unique)
+# print(index_map)
+maps = [''.join(line) for line in maps]
+# print('\n'.join(maps))
+
+print('Total unique:',total_unique)
+
+print('Obstruction Positions:', obstruction_positions)
 
 
 
