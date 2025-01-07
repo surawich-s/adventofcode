@@ -23,35 +23,34 @@ def get_next_direction(current_key):
     return keys[next_index]
             
 def traverse(x,y, dx=0, dy=-1, direction = 'n', total_unique=0):
-    exit = False
-    obstruction_positions = 0
-    while not exit:
+    visited_states = set()  # Track (x, y, direction) states
+    while True:
+        # maps[y][x] = 'x'
         # next_y, next_x = y + dy, x + dx
         #  # Debug prints
         # print(f"Current position: ({y}, {x})")
         # print(f"Trying to move to: ({next_y}, {next_x})")
         # print(f"Map bounds: height={len(maps)}, width={len(maps[0])}")
 
+        state = (x, y, direction)
+        if state in visited_states:
+            return 0  # Loop detected
+        visited_states.add(state)
+
         # found edges return value
         if y+dy < 0 or y+dy > len(maps)-1 or x+dx < 0 or x+dx > len(maps[0])-1:
-            print('Found exit!!')
-            exit = True
+            # print('Found exit!!')
             break
 
-        if not maps[y+dy][x+dx] == '#':
-            # print(f"From direction: {direction}")
-            tmp_direction = get_next_direction(direction)
-            # print(f"New direction: {tmp_direction}")
-            tmp_dy,tmp_dx = direction_table[tmp_direction]
-            # print(f"tmp_dy, tmp_dx: ({tmp_dy},{tmp_dx})")
-            startx, starty = x,y
-            # print(f"Starting at {y} {x}")
-            obstruction_positions += traverse_with_imaginary_wall(x+tmp_dx,y+tmp_dy,tmp_dx,tmp_dy,tmp_direction, startx, starty, direction)
+        # if (y,x) in index_map and index_map[y,x] == direction:
+        #     return 0
         
         # check if this position is unique
         if (y,x) not in index_map:
             index_map[y,x] = direction
             total_unique += 1
+
+        
 
         # found next position is turning point
         if maps[y+dy][x+dx] == '#':
@@ -60,51 +59,34 @@ def traverse(x,y, dx=0, dy=-1, direction = 'n', total_unique=0):
             # print('Change direction to:', direction)
             dy,dx = direction_table[direction]
             # print('dy, dx:',dy,dx)
+        else:
+        
+            # print('Traverse to:', y+dy, x+dx, 'direction:', direction)
+            y += dy
+            x += dx
 
-        # print('Traverse to:', y+dy, x+dx, 'direction:', direction)
-        y += dy
-        x += dx
-
-    return total_unique + 1, obstruction_positions
+    return total_unique + 1
             
-def traverse_with_imaginary_wall(x,y, dx, dy, direction, startx, starty, start_direction):
+def traverse_with_imaginary_wall(maps):
+    obstruction_positions = 0
+    original_map = maps.copy()
+    for i in range(len(maps)):
+        for j in range(len(maps[0])):
+             maps = original_map.copy()
+             if not maps[i][j] == '#' and not maps[i][j] == '^':
+                
+                
+                
+                maps[i][j] = '#'
 
-    visited = set()
-    while True:
+                index_map.clear()
 
-        # Debug prints
-        # print(f"Current position: ({y}, {x})")
-        # print(f"dy, dx: ({dy},{dx})")
-
-        current_state = (x, y, direction)
-        if current_state in visited:
-            return False  # We're in a cycle that's not returning to start
-        visited.add(current_state)
-
-        
-        # found edges, impossible to be loop
-        if y+dy < 0 or y+dy > len(maps)-1 or x+dx < 0 or x+dx > len(maps[0])-1:
-            # print(f"\n\n Out of bound !! \n\n")
-            return False
-        
-        if startx == x and starty == y and direction == start_direction:
-            # print(f"Back to starting point: ({y},{x})")
-            # print(f"\n\n Loop \n\n")
-            return True
-    
-        # found next position is turning point
-        # print('Next position is:', y+dy,x+dx, 'which is:',maps[y+dy][x+dx])
-        if maps[y+dy][x+dx] == '#':
-            
-            direction = get_next_direction(direction)
-            # print('Change direction to:', direction)
-            dy,dx = direction_table[direction]
-            # print('dy, dx:',dy,dx)
-        
-        y += dy
-        x += dx
+                if traverse(starting_point[0], starting_point[1]) == 0:
+                    obstruction_positions += 1
+    return obstruction_positions
 
 file_path = "6.txt"
+
 maps = read_file_to_list(file_path)
 
 starting_point = find_starting_point(maps)
@@ -115,11 +97,9 @@ x,y = starting_point[0], starting_point[1]
 
 direction_table = {'n': [-1,0], 'e': [0,1], 's': [1,0], 'w': [0,-1]}
 
-total_unique, obstruction_positions = traverse(x,y)
+total_unique = traverse(x,y)
 
-# print(index_map)
-maps = [''.join(line) for line in maps]
-# print('\n'.join(maps))
+obstruction_positions = traverse_with_imaginary_wall(maps)
 
 print('Total unique:',total_unique)
 
