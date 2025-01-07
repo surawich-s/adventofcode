@@ -22,7 +22,8 @@ def get_next_direction(current_key):
     next_index = (current_index + 1) % len(keys)
     return keys[next_index]
             
-def traverse(x,y, dx=0, dy=-1, direction = 'n', total_unique=0):
+def traverse(x,y, dx=0, dy=-1, direction = 'n'):
+    visited_positions = set()  # Track unique (x, y) positions
     visited_states = set()  # Track (x, y, direction) states
     while True:
         # maps[y][x] = 'x'
@@ -31,7 +32,7 @@ def traverse(x,y, dx=0, dy=-1, direction = 'n', total_unique=0):
         # print(f"Current position: ({y}, {x})")
         # print(f"Trying to move to: ({next_y}, {next_x})")
         # print(f"Map bounds: height={len(maps)}, width={len(maps[0])}")
-
+        visited_positions.add((x,y))
         state = (x, y, direction)
         if state in visited_states:
             return 0  # Loop detected
@@ -41,16 +42,6 @@ def traverse(x,y, dx=0, dy=-1, direction = 'n', total_unique=0):
         if y+dy < 0 or y+dy > len(maps)-1 or x+dx < 0 or x+dx > len(maps[0])-1:
             # print('Found exit!!')
             break
-
-        # if (y,x) in index_map and index_map[y,x] == direction:
-        #     return 0
-        
-        # check if this position is unique
-        if (y,x) not in index_map:
-            index_map[y,x] = direction
-            total_unique += 1
-
-        
 
         # found next position is turning point
         if maps[y+dy][x+dx] == '#':
@@ -65,24 +56,21 @@ def traverse(x,y, dx=0, dy=-1, direction = 'n', total_unique=0):
             y += dy
             x += dx
 
-    return total_unique + 1
+    return len(visited_positions)
             
 def traverse_with_imaginary_wall(maps):
     obstruction_positions = 0
-    original_map = maps.copy()
     for i in range(len(maps)):
         for j in range(len(maps[0])):
-             maps = original_map.copy()
              if not maps[i][j] == '#' and not maps[i][j] == '^':
                 
-                
+                original_char = maps[i][j]
                 
                 maps[i][j] = '#'
 
-                index_map.clear()
-
                 if traverse(starting_point[0], starting_point[1]) == 0:
                     obstruction_positions += 1
+                maps[i][j] = original_char
     return obstruction_positions
 
 file_path = "6.txt"
@@ -90,8 +78,6 @@ file_path = "6.txt"
 maps = read_file_to_list(file_path)
 
 starting_point = find_starting_point(maps)
-
-index_map = {}
 
 x,y = starting_point[0], starting_point[1]
 
