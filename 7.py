@@ -31,6 +31,8 @@ for result in calibrations:
             if mode == '*':
                 sum = sum * operators[index]
                 # print(f"result: {result}, operators: {operators}, sum: {sum}")
+            if mode == '||':
+                sum = int(str(sum) + str(operators[index]))
 
             if sum > result:
                 return False
@@ -38,7 +40,7 @@ for result in calibrations:
             if index == len(operators)-1 :
                 return sum == result
 
-            return possible_result(index+1, sum, '+') or possible_result(index+1, sum, '*')
+            return possible_result(index+1, sum, '+') or possible_result(index+1, sum, '*') or possible_result(index+1, sum, '||')
 
         if possible_result(0,0,'+'):
             total_calibration_result += result
