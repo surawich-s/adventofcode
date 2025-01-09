@@ -11,50 +11,66 @@ def read_file_to_list(file_path):
     return maps
 
 def setup_antinode(yA,xA,yB,xB):
-    print(f"compare {yA} {xA} with {yB} {xB}")
-    dy = abs(yA-yB)
-    dx = abs(xA-xB)
-
-    newYA = yA - dy if yA < yB else yA + dy
-    newXA = xA - dx if xA < xB else xA + dx
-    newXB = xB - dx if xB < xA else xB + dx
-    newYB = yB - dy if yB < yA else yB + dy
-
-
-    # determine if possible to setup an antinode, store this position [y,x]
-
-    # check if this indices permissable
-
-    newA = [newYA,newXA]
-    newB = [newXB,newYB]
 
     def checkValid(y, x):
         # 1. Check bounds first
         if not (0 <= y <= ylen) or not (0 <= x <= xlen):
-            print(f"Position {y},{x} is out of bounds")  # Added debug print
+            # print(f"Position {y},{x} is out of bounds")  # Added debug print
             return False
-        
-        # Didn't need to check for vacant because antinode can be overlapped with antenna
-        # 2. Should check new_maps instead of maps
-        # if new_maps[y][x] == '#':  # Simplified comparison
-        #     print(f"Position {y},{x} is occupied by {new_maps[y][x]}")  # Added debug print
-        #     return False
-        
-        print(f"Valid position: {y},{x}")
+        # print(f"Valid position: {y},{x}")
         return True
+    
+    # print(f"compare {yA} {xA} with {yB} {xB}")
 
-    if checkValid(*newA):
-        unique_antinode_locations.add((newYA, newXA))
-        print(f"Add antinodes on {maps[newYA][newXA]}")
-        if new_maps[newYA][newXA] == '.':
-            new_maps[newYA][newXA] = '#'
-    if checkValid(*newB):
-        unique_antinode_locations.add((newYB, newXB))
-        print(f"Add antinodes on {maps[newYB][newXB]}")
-        if new_maps[newYB][newXB] == '.':
-            new_maps[newYB][newXB] = '#'
+    dy = abs(yA-yB)
+    dx = abs(xA-xB)
 
-maps = read_file_to_list('example.txt')
+    dYA = -dy if yA < yB else dy
+    dXA = -dx if xA < xB else dx
+    dYB = -dy if yB < yA else dy
+    dXB = -dx if xB < xA else dx
+
+
+    unique_antinode_locations_new_mode.add((yA, xA))
+    unique_antinode_locations_new_mode.add((yB, xB))
+
+    # do iteration
+    count = 0
+    while True:
+        newYA = yA + dYA
+        newXA = xA + dXA
+        newYB = yB + dYB
+        newXB = xB + dXB
+
+        newA = [newYA,newXA]
+        newB = [newXB,newYB]
+
+        checkA = checkValid(*newA)
+        checkB = checkValid(*newB)
+
+        if checkA:
+            if count == 0:
+                unique_antinode_locations.add((newYA, newXA))
+            unique_antinode_locations_new_mode.add((newYA, newXA))
+            # print(f"Add antinodes on {newYA} {newXA}")
+            if new_maps[newYA][newXA] == '.':
+                new_maps[newYA][newXA] = '#'
+        if checkB:
+            if count == 0:
+                unique_antinode_locations.add((newYB, newXB))
+            unique_antinode_locations_new_mode.add((newYB, newXB))
+            # print(f"Add antinodes on {newYB} {newXB}")
+            if new_maps[newYB][newXB] == '.':
+                new_maps[newYB][newXB] = '#'
+
+        if not checkA and not checkB:
+            break
+        
+        count += 1
+        yA, xA = newYA, newXA
+        yB, xB = newYB, newXB
+
+maps = read_file_to_list('8.txt')
 
 new_maps = maps.copy()
 
@@ -77,19 +93,19 @@ for y in range(len(maps)):
 # print(unique_frequency)
 
 unique_antinode_locations = set()
+unique_antinode_locations_new_mode = set()
 
 # for each unique frequencies, run operations to set up antinodes
 for positions in unique_frequency:
-    print(positions, unique_frequency[positions])
+    # print(positions, unique_frequency[positions])
     for i in range(len(unique_frequency[positions])-1):
         for j in range(i+1, len(unique_frequency[positions])):
-            
-
             # compare current position of antenna then process with another antenna within same frequency
             setup_antinode(*unique_frequency[positions][i],*unique_frequency[positions][j])
 
-print('\n'.join(''.join(row) for row in new_maps))
-print(len(unique_antinode_locations))
+# print('\n'.join(''.join(row) for row in new_maps))
+print('Number of unique antinode locations:',len(unique_antinode_locations))
+print('Number of unique antinode locations with new mode:',len(unique_antinode_locations_new_mode))
 
     
 
