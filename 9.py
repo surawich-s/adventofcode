@@ -12,7 +12,8 @@ def read_file_to_list(file_path):
         index_count = 0
         for i in range(len(text)):
             if i % 2 == 0:
-                disk_map.append(str(index_count) * int(text[i]))
+                for i in range(int(text[i])):
+                    disk_map.append(str(index_count))
                 index_count += 1
             else:
                 if text[i] != '0':
@@ -21,7 +22,7 @@ def read_file_to_list(file_path):
 
 disk_map = read_file_to_list('9.txt')
 
-# print(disk_map)
+print(disk_map[:100])
 
 # iterate through disk_map for i in range: if find certain chunk of free space, go to the string at last index of disk_map
 
@@ -30,6 +31,8 @@ disk_map = read_file_to_list('9.txt')
 # if filled go next to another chunk
 # do til no disk_map no longer have free space
 
+product_disk_map = []
+
 for i,item in enumerate(disk_map):
     if type(item) == int:
         disk_map[i] = []
@@ -37,19 +40,20 @@ for i,item in enumerate(disk_map):
             # print(disk_map[-1], type(disk_map[-1]))
             if type(disk_map[-1]) == int:
                 disk_map.pop()
-            
-            disk_map[i].append(disk_map[-1][-1])
-            disk_map[-1] = disk_map[-1][:-1]
-            if len(disk_map[-1]) == 0:
-                disk_map.pop()
-        disk_map[i] = ''.join(disk_map[i])
 
-disk_map = ''.join(disk_map)
-print(disk_map)
+            if type(disk_map[-1]) == list:
+                break
+            disk_map[i].append(disk_map[-1])
+            disk_map.pop()
+        # print(disk_map[i])
+        product_disk_map.extend(disk_map[i])
+    else:
+        product_disk_map.append(disk_map[i])
+# disk_map = ''.join(disk_map)
+print(product_disk_map)
                 
 # calculate checksum
 checksum = 0
-for i in range(len(disk_map)):
-    checksum += i * int(disk_map[i])
-
+for i in range(len(product_disk_map)):
+    checksum += i * int(product_disk_map[i])
 print('Checksum:', checksum)
