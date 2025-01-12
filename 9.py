@@ -1,6 +1,4 @@
-# recieve string of input
 
-# for index that is even: add it to data list as a chunk of data [00,[],111,[],2222,...]
 
 def read_file_to_list(file_path):
     disk_map = []
@@ -13,31 +11,24 @@ def read_file_to_list(file_path):
         index_count = 0
         for i in range(len(text)):
             if i % 2 == 0:
-                for i in range(int(text[i])):
+                for _ in range(int(text[i])):
                     disk_map.append(str(index_count))
-                    disk_map_2.append(str(index_count))
+                disk_map_2.append((i//2+1, int(text[i])))
                 index_count += 1
             else:
-                if text[i] != '0':
-                    disk_map.append(int(text[i]))
-                    for x in range(int(text[i])):
-                        disk_map_2.append('.')
+                disk_map.append(int(text[i]))
+                disk_map_2.append((0, int(text[i])))
+
     return disk_map, disk_map_2
 
 def calculate_checksum(map):
     checksum = 0
+    # print(map)
     for i in range(len(map)):
-        if(map[i] == '.' or type(map[i]) == int):
+        if(map[i] == '.' or map[i] == -1):
             continue
         checksum += i * int(map[i])
     return checksum
-
-# iterate through disk_map for i in range: if find certain chunk of free space, go to the string at last index of disk_map
-
-# pop last char of this string and fill it in the certain chunk until filled
-# if this string is empty (len = 0) remove it, if unfilled go to next last string
-# if filled go next to another chunk
-# do til no disk_map no longer have free space
 
 def moving_file_by_Ids(disk_map):
     map = disk_map.copy()
@@ -61,74 +52,45 @@ def moving_file_by_Ids(disk_map):
             product_disk_map.append(map[i])
     # print(product_disk_map)
     return product_disk_map
-
+    
 def moving_whole_files(disk_map):
-    map = disk_map.copy()
-    i = len(map)-1
-    moving = False
-    while True and i > -1:
+    items = disk_map
+    # print(items)
+    for i in range(len(items))[::-1]:
+        for j in range(i):
+            i_data, i_size = items[i]
+            j_data, j_size = items[j]
+
+            if i_data and not j_data and i_size <= j_size:
+                items[i] = (0, i_size)
+                items[j] = (0, j_size - i_size)
+                items.insert(j, (i_data, i_size))   
+        # print(items)
         
-        while type(map[i]) == int:
-            i -= 1
 
-        current_value = map[i]
-        
-        # print(f'Check current value: {current_value}')
-        # find freq of current_value
-        freq = map.count(current_value)
-        size = freq * len(current_value)
-        free_space = 0
-        start = 0
-        for j in range(0,i-1):
-            # found free space
-            if type(map[j]) == int:
-                free_space += map[j]
-                start = j
-                if size <= free_space:
-                    tmp_list = []
-                    # replace free space
-                    for _ in range(freq):
-                        tmp_list.append(current_value)
-                        i += 1
-                    # left free space
-                    if free_space - size > 0:
-                        tmp_list.append(free_space - size)
-                    else:
-                        i -= 1
-                    map[j:j+1]=tmp_list
-                    moving = True
-                    # print(f'Moving {current_value}')
-                    break
-            else:
-                free_space = 0
-                # free space in not enough
-                # else:
-                # print(f'Not enough space for {current_value}, need {freq} sizes but have {map[j]} at index {j}')
-                    # continue
+    # Flatten the disk map
+    # print(items)
+    flat_map = []
+    for file_id, size in items:
+        flat_map.extend([file_id-1] * size)
 
-        # go to next Ids
-        # print(f'Try to skip {map[i]} compare with {current_value}')
-        while map[i] == current_value:
-            if moving:
-                # print(f'Remove map[i]: {map[i]}')
-                map[i] = len(current_value)
-            i -= 1
-        # print(map)
+    # flatten = lambda x: [x for x in x for x in x]
 
-        # 
-        moving = False
-    # print(map[:30])
-    return map
 
-disk_map, disk_map_2 = read_file_to_list('example.txt')
+    # print(sum(i*(c-1) for i,c in enumerate(flatten(
+    # [d]*s for d,s in items)) if c))    
 
-print(disk_map_2)
+    # print(flat_map)
+    return flat_map
+
+
+disk_map, disk_map_2 = read_file_to_list('9.txt')
+
+# print(disk_map_2)
 
 file_system_1 = moving_file_by_Ids(disk_map)
 
-# file_system_2 = moving_whole_files(disk_map_2)
-
-
+file_system_2 = moving_whole_files(disk_map_2)
 
 print('Checksum 1:', calculate_checksum(file_system_1))
-# print('Checksum 2:', calculate_checksum(file_system_2))
+print('Checksum 2:', calculate_checksum(file_system_2))
