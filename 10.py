@@ -12,34 +12,41 @@ def find_starting_point(topo_map):
     for y in range(len(topo_map)):
         for x in range(len(topo_map[0])):
             if topo_map[y][x] == '0':
-                total_trailhead += hiking(y,x,0)
-                print(total_trailhead)
+                total_trailhead += hiking(y,x,0,set())
+                # print(total_trailhead)
+
+    return total_trailhead
 
 
-def hiking(y,x,expected_level):
-    
-    if(x < 0 or x > len(topo_map[0])-1 or y < 0 or y > len(topo_map)-1):
-        print('Out of bound')
+def hiking(y,x,expected_level,trailheads):
+    # print(f'At {y} {x}, expected level: {expected_level}')
+    if(x < 0 or x >= len(topo_map[0]) or y < 0 or y >= len(topo_map)):
+        # print('Out of bound')
         return 0
-    
-    print(f'At {y} {x}, level: {topo_map[y][x]}, expected level: {expected_level}')
     
     if topo_map[y][x] != str(expected_level):
-        print('Not expected level')
+        # print('Not expected level')
         return 0
     
-    if expected_level == '9':
-        print('Found trailhead')
-        return 1
+    if expected_level == 9:
+        # check if unique trailhead, if add to trailhead and count trailhead
+        if (y,x) not in trailheads:
+            trailheads.add((y,x))
+            # print('Found trailhead')
+            return 1
     
     expected_level += 1
 
-    return sum([hiking(y+1,x,expected_level), hiking(y-1,x,expected_level), hiking(y,x+1,expected_level), hiking(y,x-1,expected_level)])
+    return sum([
+        hiking(y + 1, x, expected_level,trailheads),  # South
+        hiking(y - 1, x, expected_level,trailheads),  # North
+        hiking(y, x + 1, expected_level,trailheads),  # East
+        hiking(y, x - 1, expected_level,trailheads)   # West
+    ])
 
 
 
-
-topo_map = read_file_to_list('example.txt')
+topo_map = read_file_to_list('10.txt')
 
 total_trailhead = find_starting_point(topo_map)
 
